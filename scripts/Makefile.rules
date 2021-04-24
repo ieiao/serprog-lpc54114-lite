@@ -1,0 +1,44 @@
+# Makefile rules
+
+# Verbose
+V ?= 0
+ifeq ($(V),1)
+at :=
+else
+at := @
+endif
+
+# Common rules
+objs := $(patsubst %.c,$(O)/%.o,$(srcs))
+objs := $(patsubst %.S,$(O)/%.o,$(objs))
+deps := $(objs:%.o=%.d)
+
+all: $(O)/$(target)
+
+$(O)/$(target): $(objs)
+	@echo -e "  LD\t$@"
+	$(at)$(CC) -o $@ $^ $(LDFLAGS)
+	$(at)$(OBJCOPY) -O ihex $@ $@.hex
+	$(at)$(SIZE) --format=berkeley $@
+
+show:
+	@echo $(objs) | tr " " "\n"
+
+pyocd_flash: $(O)/$(target)
+	$(at)pyocd flash -t $(device) -f 10m $(O)/$(target).hex
+
+-include $(deps)
+$(O)/%.o: %.c
+	@echo -e "  CC\t$<"
+	@if [ ! -d $(dir $@) ]; then mkdir -p $(dir $@); fi
+	$(at)$(CC) -c -o $@ $< $(CFLAGS)
+
+$(O)/%.o: %.S
+	@echo -e "  AS\t$<"
+	@if [ ! -d $(dir $@) ]; then mkdir -p $(dir $@); fi
+	$(at)$(CC) -c -o $@ $< $(ASMFLAGS)
+
+.PHONY: clean
+clean:
+	@echo "  CLEAN"
+	$(at)rm -rf $(O)

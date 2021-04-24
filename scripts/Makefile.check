@@ -1,0 +1,11 @@
+# Makefile check
+
+target ?= "empty"
+ifeq ($(target), "empty")
+$(error target is empty)
+endif
+
+device ?= "empty"
+ifeq ($(device), "empty")
+$(error device is empty)
+endif

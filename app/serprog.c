@@ -52,7 +52,7 @@ int main(void)
 
     BOARD_InitPins();
     BOARD_BootClockPLL150M();
-    CLOCK_SetupFROClocking(96000000U); /*!< Set up high frequency FRO output to selected frequency */
+    CLOCK_SetupFROClocking(48000000U); /*!< Set up high frequency FRO output to selected frequency */
 
     CLOCK_AttachClk(kFRO_HF_to_FLEXCOMM2);
     RESET_PeripheralReset(kFC2_RST_SHIFT_RSTn);
@@ -60,7 +60,7 @@ int main(void)
     masterConfig.direction    = kSPI_MsbFirst;
     masterConfig.polarity     = kSPI_ClockPolarityActiveHigh;
     masterConfig.phase        = kSPI_ClockPhaseFirstEdge;
-    masterConfig.baudRate_Bps = 48000000;
+    masterConfig.baudRate_Bps = 24000000;
     masterConfig.sselNum      = (spi_ssel_t)3;
     masterConfig.sselPol      = (spi_spol_t)kSPI_SpolActiveAllLow;
     SPI_MasterInit(SPI2, &masterConfig, CLOCK_GetFlexCommClkFreq(2));

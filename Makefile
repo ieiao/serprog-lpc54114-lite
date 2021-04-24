@@ -1,19 +1,12 @@
-# serprog project Makefile
-SHELL:= bash -e
+# serprog Makefile
 
-# Cross compile prefix
-CROSS_COMPILE := ~/opt/toolchain/gcc-arm-none-eabi-10-2020-q4-major/bin/arm-none-eabi-
-
-# Toolchain define
-CC := $(CROSS_COMPILE)gcc
-OBJCOPY := $(CROSS_COMPILE)objcopy
-SIZE := $(CROSS_COMPILE)size
+include scripts/Makefile.common
 
 # Target
 target := serprog
 
-# Build output directory
-OUTPUT := build
+# Device
+device := lpc54114
 
 # Source files
 srcs += \
@@ -41,21 +34,6 @@ srcs += \
 	components/tinyusb/src/class/cdc/cdc_device.c \
 	components/tinyusb/src/class/vendor/vendor_device.c \
 	components/tinyusb/src/portable/nxp/lpc_ip3511/dcd_lpc_ip3511.c
-
-# Default ASMFLAGS
-ASMFLAGS := -Wall -fno-common -ffunction-sections -fdata-sections
-ASMFLAGS += -ffreestanding -fno-builtin -mapcs -std=gnu99
-
-# Default CFLAGS
-CFLAGS := -Wall -fno-common -ffunction-sections -fdata-sections
-CFLAGS += -ffreestanding -fno-builtin -mapcs -std=gnu99
-CFLAGS += -MMD -MP
-
-# Default LDFLAGS
-LDFLAGS := -Wall -fno-common -ffunction-sections -fdata-sections
-LDFLAGS += --specs=nano.specs --specs=nosys.specs
-LDFLAGS += -ffreestanding -fno-builtin -mapcs
-LDFLAGS += -Xlinker --gc-sections -Xlinker -static
 
 # Project specific ASMFLAGS
 ASMFLAGS += -DNDEBUG -D__STARTUP_CLEAR_BSS
@@ -89,38 +67,7 @@ LDFLAGS += -L device/gcc -l power_cm4_hardabi
 ## Link script
 LDFLAGS += -Tdevice/gcc/LPC54114J256_cm4_flash.ld
 ## Map file
-LDFLAGS += -Xlinker -Map=$(OUTPUT)/output.map
+LDFLAGS += -Xlinker -Map=$(O)/output.map
 
-# Common rules
-objs := $(patsubst %.c,$(OUTPUT)/%.o,$(srcs))
-objs := $(patsubst %.S,$(OUTPUT)/%.o,$(objs))
-deps := $(objs:%.o=%.d)
-
-$(OUTPUT)/$(target): $(objs)
-	@echo -e "  LD\t$@"
-	@$(CC) -o $@ $^ $(LDFLAGS)
-	@echo -e "  HEX\t$@"
-	@$(OBJCOPY) -O ihex $@ $@.hex
-	@$(SIZE) --format=berkeley $@
-
-show:
-	@echo $(objs) | tr " " "\n"
-
-flash: $(OUTPUT)/$(target)
-	@pyocd flash -t lpc54114 $(OUTPUT)/$(target).hex
-
--include $(deps)
-$(OUTPUT)/%.o: %.c
-	@echo -e "  CC\t$<"
-	@if [ ! -d $(dir $@) ]; then mkdir -p $(dir $@); fi
-	@$(CC) -c -o $@ $< $(CFLAGS)
-
-$(OUTPUT)/%.o: %.S
-	@echo -e "  AS\t$<"
-	@if [ ! -d $(dir $@) ]; then mkdir -p $(dir $@); fi
-	@$(CC) -c -o $@ $< $(ASMFLAGS)
-
-.PHONY: clean
-clean:
-	@echo "  CLEAN"
-	@rm -rf $(OUTPUT)
+include scripts/Makefile.check
+include scripts/Makefile.rules

@@ -1,0 +1,29 @@
+# Makefile common
+SHELL:= bash -e
+
+# Cross compile prefix
+CROSS_COMPILE ?= arm-none-eabi-
+
+# Toolchain define
+CC = $(CROSS_COMPILE)gcc
+OBJCOPY = $(CROSS_COMPILE)objcopy
+SIZE = $(CROSS_COMPILE)size
+
+# Build output directory
+O ?= build
+
+# Default ASMFLAGS
+ASMFLAGS := -Wall -fno-common -ffunction-sections -fdata-sections
+ASMFLAGS += -ffreestanding -fno-builtin -mapcs -std=gnu99
+
+# Default CFLAGS
+CFLAGS := -Wall -fno-common -ffunction-sections -fdata-sections
+CFLAGS += -ffreestanding -fno-builtin -mapcs -std=gnu99
+CFLAGS += -MMD -MP
+
+# Default LDFLAGS
+LDFLAGS := -Wall -fno-common -ffunction-sections -fdata-sections
+LDFLAGS += --specs=nano.specs --specs=nosys.specs
+LDFLAGS += -ffreestanding -fno-builtin -mapcs
+LDFLAGS += -Xlinker --gc-sections -Xlinker -static
+LDFLAGS += -Wl,--print-memory-usage
