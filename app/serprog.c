@@ -153,8 +153,7 @@ void handle_command(uint8_t command)
         break;
 
     case S_CMD_O_SPIOP:
-        while ( tud_cdc_available() < 6 )
-            vTaskDelay(pdMS_TO_TICKS(10));
+        while ( tud_cdc_available() < 6 );
         tud_cdc_read(sbuf, 6);
         slen = sbuf[0] | (sbuf[1] << 8) | (sbuf[2] << 16);
         rlen = sbuf[3] | (sbuf[4] << 8) | (sbuf[5] << 16);
